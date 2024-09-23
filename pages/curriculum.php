@@ -92,8 +92,8 @@ include '../database/db.php';
             </table>
         </div>
         <div class="curriculum-content">
-            <a class="pagination-btn <?php echo $page == 1 ? 'pagination-disable' : ''; ?>" <?php if($page != 1) echo 'aria-label="Previous"'; ?> href="?page=<?php echo $page - 1; ?>">
-                <?php if($page != 1) echo '&lt;'; ?>
+            <a class="pagination-btn <?php echo $page == 1 ? 'pagination-disable' : ''; ?>" href="?page=<?php echo $page - 1; ?>">
+                <?php echo '&lt;'; ?>
             </a>
             <?php
             $hasPrintedMiddle = false;
@@ -111,8 +111,8 @@ include '../database/db.php';
                 <?php endif;
             endfor;
             ?>
-            <a class="pagination-btn <?php echo $page == $totalPages ? 'pagination-disable' : ''; ?>" <?php if($page != 1) echo 'aria-label="Next"'; ?> href="?page=<?php echo $page + 1; ?>">
-                <?php if($page != $totalPages) echo '&gt;'; ?>
+            <a class="pagination-btn <?php echo $page == $totalPages ? 'pagination-disable' : ''; ?>"  href="?page=<?php echo $page + 1; ?>">
+                <?php echo '&gt;'; ?>
             </a>
         </div>
     </div>
