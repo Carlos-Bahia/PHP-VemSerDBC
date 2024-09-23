@@ -1,0 +1,150 @@
+.curriculum-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: calc(100vh - 7vh);
+    width: 100%;
+    margin-bottom: 3vh ;
+}
+
+.curriculum-table-title {
+    width: 85%;
+    margin-top: 2em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.curriculum-table-title h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2em;
+    color: black;
+    margin: 0;
+}
+
+.curriculum-table-title button {
+    background-color: #007bff;
+    color: white;
+    padding: 0.6em 1.2em;
+    border: none;
+    border-radius: 1em;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.curriculum-table-title button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.curriculum-content {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.curriculum-table-info {
+    width: 85%;
+    border: 1px solid #ddd;
+    border-radius: 1em;
+    text-align: center;
+    border-collapse: collapse;
+    overflow: hidden;
+}
+
+.curriculum-table-info th, .curriculum-table-info td {
+    padding: 1em;
+    font-size: 1em;
+    font-family: 'Poppins', sans-serif;
+}
+
+.curriculum-table-info thead {
+    background-color: #070F26;
+    color: white;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #f1f1f1;
+}
+
+tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.eye-icon {
+    width: 1em;
+    cursor: pointer;
+}
+
+.curriculum-content span {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+}
+
+.curriculum-content a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 1rem;
+    margin: 0 0.2em;
+}
+
+.curriculum-content:last-child a{
+    margin-top: 1em;
+}
+
+.pagination-btn {
+    background-color: white;
+    border: 1px solid #ddd;
+    color: #007bff;
+    padding: 0.5em 0.8em;
+    margin: 0 0.2em 2em 0;
+    border-radius: 0.5em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    text-decoration: none;
+}
+
+.pagination-actual {
+    background-color: #E9ECEF;
+    color: white;
+}
+
+.pagination-disable {
+    display: none;
+}
+
+@media (max-width: 810px) {
+
+    .curriculum-content {
+        margin: 0;
+    }
+
+    .curriculum-table-info {
+        width: 90%;
+    }
+
+    .curriculum-table-info thead {
+        display: none;
+    }
+
+    .curriculum-table-info tbody td {
+        display: block;
+    }
+}
+
+@media (max-width: 450px) {
+    .curriculum-table-title {
+        display: block;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 0.8em;
+    }
+}

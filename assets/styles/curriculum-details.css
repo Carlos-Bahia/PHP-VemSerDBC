@@ -1,0 +1,107 @@
+.curriculum-details-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: calc(100vh - 7vh);
+    width: 100%;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-family: "Poppins", sans-serif;
+}
+
+.curriculum-details-title {
+    width: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2vh;
+}
+
+.curriculum-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.curriculum-actions button{
+    background-color: #007bff;
+    color: white;
+    padding: 0.6em 1.2em;
+    border: none;
+    border-radius: 1em;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    margin-left: 1em;
+}
+
+.curriculum-actions button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.curriculum-actions button:last-child {
+    background-color: red;
+}
+
+.curriculum-actions button:last-child:hover {
+    background-color: darkred;
+}
+
+li{
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul {
+    padding: 0;
+    margin: 0;
+}
+
+.curriculum-details {
+    width: 80%;
+    display: flex;
+    flex-wrap: wrap;
+    height: 80vh;
+    border: 1px solid lightgray;
+    border-radius: 1em;
+    padding: 0 1em 1em 1em;
+    margin-bottom: 5vh;
+}
+
+.details {
+    flex: 1;
+    text-align: center;
+}
+
+.divider {
+    border: 0;
+    border-top: 1px solid lightgray;
+    width: 80%;
+    height: 1px;
+    margin: 2em auto 0 auto;
+}
+
+.knowledge {
+    width: 100%;
+    text-align: center;
+}
+
+.knowledge ul {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1em;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.knowledge li {
+    background-color: #f9f9f9; /* Cor de fundo para os itens */
+    padding: 10px;
+    border: 1px solid #ddd; /* Borda leve para separar os itens */
+    border-radius: 5px; /* Bordas arredondadas */
+    text-align: center; /* Centraliza o texto */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra leve para dar profundidade */
+}

@@ -1,0 +1,56 @@
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs e arquivos temporários
+*.log
+*.cache
+*.tmp
+
+# Configurações de IDE (PhpStorm, IntelliJ)
+.idea/
+*.iml
+
+# Composer
+/vendor/
+/composer.lock
+
+# Dependências de pacotes PHP
+/vendor/
+composer.phar
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.*.local
+
+# Cache do Symfony
+/var/
+/app/cache/
+/app/logs/
+/app/config/parameters.yml
+
+# Configurações de deploy
+.deploy/
+
+# Diretórios de upload ou temporários
+/public/uploads/
+/tmp/
+
+# Node.js
+node_modules/
+
+# Arquivos de teste ou debug
+phpunit.xml
+phpunit.xml.dist
+.phpunit.result.cache
+
+# Arquivos específicos do OS
+*.swp
+*.swo
+*.bak
+*.orig
+
+# Caches gerais
+/cache/
+/logs/
