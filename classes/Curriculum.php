@@ -1,6 +1,8 @@
 <?php
 
-namespace classes;
+namespace src\classes;
+use classes\Exception;
+
 require '../database/db.php';
 
 class Curriculum {
@@ -14,55 +16,13 @@ class Curriculum {
     private $experiences = [];
     private $knowledges = [];
 
-    public function __construct($name, $age, $qualifications, $contact, $github = null) {
+    public function __construct($name, $age, $qualifications, $contact, $github = null, $id = null) {
         $this->name = $name;
         $this->age = $age;
         $this->qualifications = $qualifications;
         $this->contact = $contact;
         $this->github = $github;
-    }
-
-    public function save($pdo) {
-        try {
-            $pdo->beginTransaction();
-
-            $stmt = $pdo->prepare("INSERT INTO Curriculum (name, age, qualifications, contact, github) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$this->name, $this->age, $this->qualifications, $this->contact, $this->github]);
-            $this->setId($pdo->lastInsertId());
-
-            $pdo->commit();
-            return true;
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            throw new Exception("Erro ao salvar currículo: " . $e->getMessage());
-        }
-    }
-
-    public function saveAcademicBackgrounds($pdo) {
-        $pdo->beginTransaction();
-        foreach ($this->academicBackgrounds as $academic) {
-            $stmt = $pdo->prepare("INSERT INTO Academic_Background (id_curriculum, scholarly, college, course_name, status) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$this->getId(), $academic->getScholarly(), $academic->getCollege(), $academic->getCourseName(), $academic->getStatus()]);
-        }
-        $pdo->commit();
-    }
-
-    public function saveExperiences($pdo) {
-        $pdo->beginTransaction();
-        foreach ($this->experiences as $experience) {
-            $stmt = $pdo->prepare("INSERT INTO Experience (id_curriculum, company_name, position, admission_date, dismissal_date, description) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$this->id, $experience->getCompanyName(), $experience->getPosition(), $experience->getAdmissionDate(), $experience->getDismissalDate(), $experience->getDescription()]);
-        }
-        $pdo->commit();
-    }
-
-    public function saveKnowledges($pdo) {
-        $pdo->beginTransaction();
-        foreach ($this->knowledges as $knowledge) {
-            $stmt = $pdo->prepare("INSERT INTO Curriculum_knowledge (id_curriculum, knowledge) VALUES (?, ?)");
-            $stmt->execute([$this->id, $knowledge->getKnowledge()]);
-        }
-        $pdo->commit();
+        $this->id = $id;
     }
 
     public function delete($pdo) {
@@ -90,15 +50,15 @@ class Curriculum {
     }
 
     public function addAcademicBackground(AcademicBackground $academicBackground) {
-        $this->academicBackgrounds[] = $academicBackground;
+        array_push($this->academicBackgrounds, $academicBackground);
     }
 
     public function addExperience(Experience $experience) {
-        $this->experiences[] = $experience;
+        array_push($this->experiences, $experience);
     }
 
     public function addKnowledge($knowledge) {
-        $this->knowledges[] = $knowledge;
+        array_push($this->knowledges, $knowledge);
     }
 
     public function getId()

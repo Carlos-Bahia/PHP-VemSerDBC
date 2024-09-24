@@ -1,72 +1,28 @@
 <?php
-require_once '../database/db.php';
+require '../database/db.php';
+require '../services/CurriculumService.php';
 
+use src\services\CurriculumService;
+
+$curriculumService = CurriculumService::getInstance();
 $curriculumId = $_GET['id'];
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    try {
-        global $pdo;
-        $pdo->beginTransaction();
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        try {
 
-        $stmt = $pdo->prepare("UPDATE Curriculum SET name = ?, age = ?, qualifications = ?, contact = ?, github = ? WHERE id = ?");
-        $stmt->execute([$_POST['name'], $_POST['age'], $_POST['qualifications'], $_POST['contact'], $_POST['github'], $curriculumId]);
+            $curriculumService->updateCurriculum($curriculumId, $_POST);
 
-        // Deletando Formação Acadêmica
-        $stmt = $pdo->prepare("DELETE FROM Academic_Background WHERE id_curriculum = ?");
-        $stmt->execute([$curriculumId]);
-
-        // Deletando Experiências
-        $stmt = $pdo->prepare("DELETE FROM Experience WHERE id_curriculum = ?");
-        $stmt->execute([$curriculumId]);
-
-        // Deletando Conhecimentos
-        $stmt = $pdo->prepare("DELETE FROM Curriculum_knowledge WHERE id_curriculum = ?");
-        $stmt->execute([$curriculumId]);
-
-        foreach ($_POST['academic'] as $academic) {
-            $stmt = $pdo->prepare("INSERT INTO Academic_Background (id_curriculum, scholarly, college, course_name, status) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$curriculumId, $academic['scholarly'], $academic['college'], $academic['course_name'], $academic['status']]);
+            header("Location: curriculum-details.php?id=$curriculumId");
+            exit();
+        } catch (Exception $e) {
+            echo "Erro: " . $e->getMessage();
         }
-
-        foreach ($_POST['experience'] as $experience) {
-            $stmt = $pdo->prepare("INSERT INTO Experience (id_curriculum, company_name, position, admission_date, dismissal_date, description) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$curriculumId, $experience['company_name'], $experience['position'], $experience['admission_date'], $experience['dismissal_date'], $experience['description']]);
-        }
-
-        foreach ($_POST['knowledge'] as $knowledge) {
-            $stmt = $pdo->prepare("INSERT INTO Curriculum_knowledge (id_curriculum, knowledge) VALUES (?, ?)");
-            $stmt->execute([$curriculumId, $knowledge]);
-        }
-
-        $pdo->commit();
-
-        header("Location: curriculum-details.php?id=$curriculumId");
-        exit();
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        echo "Erro: " . $e->getMessage();
+    } else {
+        $curriculum = $curriculumService->getCurriculumById($curriculumId);
+        $academicBackground = $curriculumService->getAcademicBackgroundByCurriculumId($curriculumId);
+        $experiences = $curriculumService->getExperiencesByCurriculumId($curriculumId);
+        $knowledges = $curriculumService->getKnowledgesByCurriculumId($curriculumId);
     }
-} else {
-    // Carregar os dados atuais do currículo para preencher os campos
-    $stmt = $pdo->prepare("SELECT * FROM Curriculum WHERE id = ?");
-    $stmt->execute([$curriculumId]);
-    $curriculum = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Carregar Formação Acadêmica
-    $stmt = $pdo->prepare("SELECT * FROM Academic_Background WHERE id_curriculum = ?");
-    $stmt->execute([$curriculumId]);
-    $academicBackgrounds = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Carregar Experiências
-    $stmt = $pdo->prepare("SELECT * FROM Experience WHERE id_curriculum = ?");
-    $stmt->execute([$curriculumId]);
-    $experiences = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Carregar Conhecimentos
-    $stmt = $pdo->prepare("SELECT * FROM Curriculum_knowledge WHERE id_curriculum = ?");
-    $stmt->execute([$curriculumId]);
-    $knowledges = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
 ?>
 
 <!DOCTYPE html>
@@ -120,54 +76,56 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="personal-data">
                 <div>
                     <label for="name">Nome:</label><br>
-                    <input type="text" name="name" value="<?= htmlspecialchars($curriculum['name']) ?>" required><br>
+                    <input type="text" name="name" value="<?= htmlspecialchars($curriculum->getName()) ?>" required><br>
                 </div>
                 <div>
                     <label for="age">Idade:</label><br>
-                    <input type="number" name="age" value="<?= htmlspecialchars($curriculum['age']) ?>" required><br>
+                    <input type="number" name="age" value="<?= htmlspecialchars($curriculum->getAge()) ?>" required><br>
                 </div>
                 <div>
                     <label for="qualifications">Qualificações:</label><br>
-                    <input type="text" name="qualifications" value="<?= htmlspecialchars($curriculum['qualifications']) ?>" required><br>
+                    <input type="text" name="qualifications" value="<?= htmlspecialchars($curriculum->getQualifications()) ?>" required><br>
                 </div>
                 <div>
                     <label for="contact">Contato:</label><br>
-                    <input type="text" name="contact" value="<?= htmlspecialchars($curriculum['contact']) ?>" required><br>
+                    <input type="text" name="contact" value="<?= htmlspecialchars($curriculum->getContact()) ?>" required><br>
                 </div>
                 <div>
                     <label for="github">GitHub:</label><br>
-                    <input type="text" name="github" value="<?= htmlspecialchars($curriculum['github']) ?>"><br>
+                    <input type="text" name="github" value="<?= htmlspecialchars($curriculum->getGithub()) ?>"><br>
                 </div>
             </div>
 
             <div class="extra-details">
                 <h2>Formação Acadêmica</h2>
                 <div class="extra-details-form" id="academic-section">
-                    <?php foreach ($academicBackgrounds as $index => $academic) : ?>
+                    <?php foreach ($academicBackground as $index => $academic) : ?>
                         <div>
                             <label for="scholarly">Nível:</label><br>
                             <select name="academic[<?= $index ?>][scholarly]" required>
-                                <option value="Ensino Médio" <?= $academic['scholarly'] == 'Ensino Médio' ? 'selected' : '' ?>>Ensino Médio</option>
-                                <option value="Ensino Técnico" <?= $academic['scholarly'] == 'Ensino Técnico' ? 'selected' : '' ?>>Ensino Técnico</option>
-                                <option value="Graduação" <?= $academic['scholarly'] == 'Graduação' ? 'selected' : '' ?>>Graduação</option>
-                                <option value="Pós-Graduação" <?= $academic['scholarly'] == 'Pós-Graduação' ? 'selected' : '' ?>>Pós-Graduação</option>
-                                <option value="Mestrado" <?= $academic['scholarly'] == 'Mestrado' ? 'selected' : '' ?>>Mestrado</option>
-                                <option value="Doutorado" <?= $academic['scholarly'] == 'Doutorado' ? 'selected' : '' ?>>Doutorado</option>
-                                <option value="Outros" <?= $academic['scholarly'] == 'Outros' ? 'selected' : '' ?>>Outros</option>
+                                <option value="Ensino Médio" <?= $academic->getScholarly() == 'Ensino Médio' ? 'selected' : '' ?>>Ensino Médio</option>
+                                <option value="Ensino Técnico" <?= $academic->getScholarly() == 'Ensino Técnico' ? 'selected' : '' ?>>Ensino Técnico</option>
+                                <option value="Graduação" <?= $academic->getScholarly() == 'Graduação' ? 'selected' : '' ?>>Graduação</option>
+                                <option value="Pós-Graduação" <?= $academic->getScholarly() == 'Pós-Graduação' ? 'selected' : '' ?>>Pós-Graduação</option>
+                                <option value="Mestrado" <?= $academic->getScholarly() == 'Mestrado' ? 'selected' : '' ?>>Mestrado</option>
+                                <option value="Doutorado" <?= $academic->getScholarly() == 'Doutorado' ? 'selected' : '' ?>>Doutorado</option>
+                                <option value="Outros" <?= $academic->getScholarly() == 'Outros' ? 'selected' : '' ?>>Outros</option>
                             </select><br>
                             <label for="college">Instituição:</label><br>
-                            <input type="text" name="academic[<?= $index ?>][college]" value="<?= htmlspecialchars($academic['college']) ?>" required><br>
+                            <input type="text" name="academic[<?= $index ?>][college]" value="<?= htmlspecialchars($academic->getCollege()) ?>" required><br>
                             <label for="course_name">Curso:</label><br>
-                            <input type="text" name="academic[<?= $index ?>][course_name]" value="<?= htmlspecialchars($academic['course_name']) ?>" required><br>
+                            <input type="text" name="academic[<?= $index ?>][course_name]" value="<?= htmlspecialchars($academic->getCourseName()) ?>" required><br>
                             <label for="status">Status:</label><br>
                             <select name="academic[<?= $index ?>][status]" required>
-                                <option value="Em Andamento" <?= $academic['status'] == 'Em Andamento' ? 'selected' : '' ?>>Em Andamento</option>
-                                <option value="Concluído" <?= $academic['status'] == 'Concluído' ? 'selected' : '' ?>>Concluído</option>
-                                <option value="Interrompido" <?= $academic['status'] == 'Interrompido' ? 'selected' : '' ?>>Interrompido</option>
-                                <option value="Não Informado" <?= $academic['status'] == 'Não Informado' ? 'selected' : '' ?>>Não Informado</option>
+                                <option value="Em Andamento" <?= $academic->getStatus() == 'Em Andamento' ? 'selected' : '' ?>>Em Andamento</option>
+                                <option value="Concluído" <?= $academic->getStatus() == 'Concluído' ? 'selected' : '' ?>>Concluído</option>
+                                <option value="Interrompido" <?= $academic->getStatus() == 'Interrompido' ? 'selected' : '' ?>>Interrompido</option>
+                                <option value="Não Informado" <?= $academic->getStatus() == 'Não Informado' ? 'selected' : '' ?>>Não Informado</option>
                             </select><br>
+                            <input type="hidden" name="academic[<?= $index ?>][id]" value="<?= htmlspecialchars($academic->getId()) ?>" required><br>
+
                         </div>
-                        <?php if($academic !== end($academicBackgrounds)) : ?>
+                        <?php if($academic !== end($academicBackground)) : ?>
                             <div class="divider"></div>
                         <?php endif; ?>
                     <?php endforeach; ?>
@@ -183,16 +141,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <?php foreach ($experiences as $index => $experience) : ?>
                         <div>
                             <label for="company_name">Empresa:</label><br>
-                            <input type="text" name="experience[<?= $index ?>][company_name]" value="<?= htmlspecialchars($experience['company_name']) ?>" required><br>
+                            <input type="text" name="experience[<?= $index ?>][company_name]" value="<?= htmlspecialchars($experience->getCompanyName()) ?>" required><br>
                             <label for="position">Cargo:</label><br>
-                            <input type="text" name="experience[<?= $index ?>][position]" value="<?= htmlspecialchars($experience['position']) ?>" required><br>
+                            <input type="text" name="experience[<?= $index ?>][position]" value="<?= htmlspecialchars($experience->getPosition()) ?>" required><br>
                             <label for="admission_date">Data de Admissão:</label><br>
-                            <input type="date" name="experience[<?= $index ?>][admission_date]" value="<?= htmlspecialchars($experience['admission_date']) ?>" required><br>
+                            <input type="date" name="experience[<?= $index ?>][admission_date]" value="<?= htmlspecialchars($experience->getAdmissionDate()) ?>" required><br>
                             <label for="dismissal_date">Data de Demissão:</label><br>
-                            <input type="date" name="experience[<?= $index ?>][dismissal_date]" value="<?= htmlspecialchars($experience['dismissal_date']) ?>"><br>
+                            <input type="date" name="experience[<?= $index ?>][dismissal_date]" value="<?= htmlspecialchars($experience->getDismissalDate()) ?>"><br>
                             <label for="description">Descrição:</label><br>
-                            <textarea name="experience[<?= $index ?>][description]" required><?= htmlspecialchars($experience['description']) ?></textarea><br>
+                            <textarea name="experience[<?= $index ?>][description]" required><?= htmlspecialchars($experience->getDescription()) ?></textarea><br>
                         </div>
+                        <input type="hidden" name="experience[<?= $index ?>][id]" value="<?= htmlspecialchars($experience->getId()) ?>" required><br>
+
                         <?php if($experience !== end($experiences)) : ?>
                             <div class="divider"></div>
                         <?php endif; ?>
@@ -209,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <?php foreach ($knowledges as $index => $knowledge) : ?>
                         <div>
                             <label for="knowledge">Conhecimento:</label><br>
-                            <input type="text" name="knowledge[<?= $index ?>]" value="<?= htmlspecialchars($knowledge['knowledge']) ?>" required><br>
+                            <input type="text" name="knowledge[<?= $index ?>]" value="<?= htmlspecialchars($knowledge->getKnowledge()) ?>" required><br>
                         </div>
                         <?php if($knowledge !== end($knowledges)) : ?>
                             <div class="divider" id="divider-k<?php echo $index ?>"></div>

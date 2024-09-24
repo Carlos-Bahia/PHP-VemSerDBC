@@ -1,37 +1,17 @@
 <?php
 
 include '../database/db.php';
+include '../services/curriculumService.php';
+
+use src\services\CurriculumService;
+
+$curriculumService = CurriculumService::getInstance();
 
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = 8;
-    $offset = ($page - 1) * $limit;
+    $curriculum = $curriculumService->getCurriculumsPaginated($page, $limit);
+    $totalPages = $curriculumService->getTotalPages($page, $limit);
 
-    $query = "SELECT * FROM CURRICULUM LIMIT :limit OFFSET :offset";
-    $stmt = $pdo->prepare($query);
-
-    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-
-    $stmt->execute();
-
-    $curriculum = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $queryCount = "SELECT COUNT(*) FROM Curriculum";
-    $totalResults = $pdo->query($queryCount)->fetchColumn();
-    $totalPages = ceil($totalResults / $limit);
-
-    //Função para mascarar o número de contato
-    function formatContact($numero) {
-        $numero = preg_replace('/\D/', '', $numero);
-
-        if (strlen($numero) == 10) {
-            return preg_replace('/(\d{2})(\d{4})(\d{4})/', '($1) $2-$3', $numero);
-        } elseif (strlen($numero) == 11) {
-            return preg_replace('/(\d{2})(\d{1})(\d{4})(\d{4})/', '($1) $2$3-$4', $numero);
-        }
-
-        return $numero;
-    }
 ?>
 
 <!DOCTYPE html>
@@ -77,12 +57,12 @@ include '../database/db.php';
                 <tbody>
                     <?php foreach ($curriculum as $entry): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($entry['name']); ?></td>
-                            <td><?php echo htmlspecialchars($entry['qualifications']); ?></td>
-                            <td><?php echo htmlspecialchars(formatContact($entry['contact'])); ?></td>
-                            <td><a href="<?php echo $entry['github']; ?>" target="_blank"><?php echo $entry['github']; ?></a></td>
+                            <td><?php echo htmlspecialchars($entry->getName()); ?></td>
+                            <td><?php echo htmlspecialchars($entry->getQualifications()); ?></td>
+                            <td><?php echo htmlspecialchars($curriculumService::formatContact($entry->getContact())); ?></td>
+                            <td><a href="<?php echo $entry->getGithub(); ?>" target="_blank"><?php echo $entry->getGithub(); ?></a></td>
                             <td>
-                                <a href="curriculum-details.php?id=<?php echo $entry['id']; ?>">
+                                <a href="curriculum-details.php?id=<?php echo $entry->getId(); ?>">
                                     <img class="eye-icon" src="../assets/images/eye-icon.png" alt="Visualizar">
                                 </a>
                             </td>
@@ -90,6 +70,7 @@ include '../database/db.php';
                     <?php endforeach; ?>
                 </tbody>
             </table>
+
         </div>
         <div class="curriculum-content">
             <a class="pagination-btn <?php echo $page == 1 ? 'pagination-disable' : ''; ?>" href="?page=<?php echo $page - 1; ?>">

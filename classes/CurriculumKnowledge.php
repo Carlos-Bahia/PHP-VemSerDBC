@@ -1,6 +1,6 @@
 <?php
 
-namespace classes;
+namespace src\classes;
 
 class CurriculumKnowledge {
     private $curriculumId;

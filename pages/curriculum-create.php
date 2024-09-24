@@ -1,46 +1,21 @@
 <?php
-require_once '../database/db.php';
-require '../classes/curriculum.php';
-require '../classes/academicbackground.php';
-require '../classes/experience.php';
-require '../classes/curriculumknowledge.php';
 
-use classes\Curriculum;
-use classes\AcademicBackground;
-use classes\Experience;
-use classes\CurriculumKnowledge;
+    require_once '../database/db.php';
+    include '../services/curriculumService.php';
 
+use src\services\CurriculumService;
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    try {
+$curriculumService = CurriculumService::getInstance();
 
-        $curriculum = new Curriculum($_POST['name'], $_POST['age'], $_POST['qualifications'], $_POST['contact'], $_POST['github']);
-        $curriculum->save($pdo);
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        try {
+            $curriculum_Id = $curriculumService->createCompleteCurriculum($_POST);
+            header("Location: curriculum-details.php?id=" . $curriculum_Id);
 
-        foreach ($_POST['academic'] as $academic) {
-            $academicBackground = new AcademicBackground($curriculum->getId(), $academic['scholarly'], $academic['college'], $academic['course_name'], $academic['status']);
-            $curriculum->addAcademicBackground($academicBackground);
+        } catch (Exception $e) {
+            echo "Erro: " . $e->getMessage();
         }
-        $curriculum->saveAcademicBackgrounds($pdo);
-
-        foreach ($_POST['experience'] as $experience) {
-            $exp = new Experience($curriculum->getId(), $experience['company_name'], $experience['position'], $experience['admission_date'], $experience['dismissal_date'], $experience['description']);
-            $curriculum->addExperience($exp);
-        }
-        $curriculum->saveExperiences($pdo);
-
-        foreach ($_POST['knowledge'] as $knowledge) {
-            $curriculum_knowledge = new CurriculumKnowledge($curriculum->getId(), $knowledge);
-            $curriculum->addKnowledge($curriculum_knowledge);
-        }
-        $curriculum->saveKnowledges($pdo);
-
-        header("Location: curriculum-details.php?id=" . $curriculum->getId());
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        echo "Erro: " . $e->getMessage();
     }
-}
 ?>
 
 <!DOCTYPE html>

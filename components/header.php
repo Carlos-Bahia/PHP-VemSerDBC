@@ -1,6 +1,6 @@
 <header class="header-container">
     <div class="logo header-content">
-        <img style="cursor: pointer" onclick="redirectToMain()" src="https://cdn.discordapp.com/attachments/1172171935900258375/1287538339326595083/dbc.png?ex=66f1e905&is=66f09785&hm=4a6607e17ed651d89e6cef9fc711e0c21db196339b12f62e2eb894221c11a258&" alt="Logo da DBC">
+        <img style="cursor: pointer" onclick="redirectToMain()" src="<?php $_SERVER['SERVER_NAME'] ?>/Curriculum_Project/assets/images/dbc.png" alt="Logo da DBC">
     </div>
     <div class="header-content menu-toggle" id="mobile-menu">
         <span class="bar"></span>

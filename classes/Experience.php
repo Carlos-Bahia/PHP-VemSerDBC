@@ -1,6 +1,6 @@
 <?php
 
-namespace classes;
+namespace src\classes;
 
 class Experience {
     private $id;
@@ -11,13 +11,14 @@ class Experience {
     private $dismissalDate;
     private $description;
 
-    public function __construct($curriculumId, $companyName, $position, $admissionDate, $dismissalDate, $description) {
+    public function __construct($curriculumId, $companyName, $position, $admissionDate, $dismissalDate, $description, $id = null) {
         $this->curriculumId = $curriculumId;
         $this->companyName = $companyName;
         $this->position = $position;
         $this->admissionDate = $admissionDate;
         $this->dismissalDate = $dismissalDate;
         $this->description = $description;
+        $this->id = $id;
     }
 
     public function getId()

@@ -1,6 +1,6 @@
 <?php
 
-namespace classes;
+namespace src\classes;
 
 class AcademicBackground {
     private $id;
@@ -10,12 +10,13 @@ class AcademicBackground {
     private $courseName;
     private $status;
 
-    public function __construct($curriculumId, $scholarly, $college, $courseName, $status) {
+    public function __construct($curriculumId, $scholarly, $college, $courseName, $status, $id = null) {
         $this->curriculumId = $curriculumId;
         $this->scholarly = $scholarly;
         $this->college = $college;
         $this->courseName = $courseName;
         $this->status = $status;
+        $this->setId($id);
     }
 
     public function getId()

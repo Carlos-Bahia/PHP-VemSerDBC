@@ -63,7 +63,7 @@ ul {
     width: 80%;
     display: flex;
     flex-wrap: wrap;
-    height: 80vh;
+    min-height: 80vh;
     border: 1px solid lightgray;
     border-radius: 1em;
     padding: 0 1em 1em 1em;
@@ -84,17 +84,19 @@ ul {
 }
 
 .knowledge {
+    display: block;
     width: 100%;
     text-align: center;
 }
 
 .knowledge ul {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(15em, 1fr));
     gap: 1em;
     list-style-type: none;
     padding: 0;
     margin: 0;
+    box-sizing: border-box;
 }
 
 .knowledge li {

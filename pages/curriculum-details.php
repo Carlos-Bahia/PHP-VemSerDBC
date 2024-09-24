@@ -1,20 +1,17 @@
 <?php
 
-include '../database/db.php';
-require '../classes/curriculum.php';
+require '../database/db.php';
+require '../services/CurriculumService.php';
 
-use classes\Curriculum;
+use src\services\CurriculumService;
+
+$curriculumService = CurriculumService::getInstance();
 
 $page = intval($_GET['id']);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     try {
         $curriculumId = $_POST['id'];
-
-        $curriculum = new Curriculum('', '', '', '', '');
-        $curriculum->setId($curriculumId);
-
-        $curriculum->delete($pdo);
 
         header("Location: curriculum.php");
         exit();
@@ -23,43 +20,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 } else {
     try {
-        $stmtCurriculum = $pdo->prepare("SELECT c.* FROM CURRICULUM c WHERE c.id = :id");
-        $stmtCurriculum->execute(['id' => $page]);
-        $curriculum = $stmtCurriculum->fetch(PDO::FETCH_ASSOC);
-
-        $stmtAcademicBackground = $pdo->prepare("SELECT * FROM academic_background a WHERE a.id_curriculum = :id");
-        $stmtAcademicBackground->execute(['id' => $page]);
-        $academicBackground = $stmtAcademicBackground->fetchAll(PDO::FETCH_ASSOC);
-
-        $stmtExperience = $pdo->prepare("SELECT * FROM Experience e WHERE e.id_curriculum = :id");
-        $stmtExperience->execute(['id' => $page]);
-        $experience = $stmtExperience->fetchAll(PDO::FETCH_ASSOC);
-
-        $stmtKnowledge = $pdo->prepare("SELECT * FROM Curriculum_knowledge k WHERE k.id_curriculum = :id");
-        $stmtKnowledge->execute(['id' => $page]);
-        $knowledge = $stmtKnowledge->fetchAll(PDO::FETCH_ASSOC);
+        $curriculum = $curriculumService->getCurriculumById($page);
+        $academicBackground = $curriculumService->getAcademicBackgroundByCurriculumId($page);
+        $experience = $curriculumService->getExperiencesByCurriculumId($page);
+        $knowledge = $curriculumService->getKnowledgesByCurriculumId($page);
 
     } catch (PDOException $e) {
         die('Erro ao executar consultas: ' . $e->getMessage());
     }
 }
 
-function formatContact($numero) {
-    $numero = preg_replace('/\D/', '', $numero);
+    function formatContact($numero) {
+        $numero = preg_replace('/\D/', '', $numero);
 
-    if (strlen($numero) == 10) {
-        return preg_replace('/(\d{2})(\d{4})(\d{4})/', '($1) $2-$3', $numero);
-    } elseif (strlen($numero) == 11) {
-        return preg_replace('/(\d{2})(\d{1})(\d{4})(\d{4})/', '($1) $2$3-$4', $numero);
+        if (strlen($numero) == 10) {
+            return preg_replace('/(\d{2})(\d{4})(\d{4})/', '($1) $2-$3', $numero);
+        } elseif (strlen($numero) == 11) {
+            return preg_replace('/(\d{2})(\d{1})(\d{4})(\d{4})/', '($1) $2$3-$4', $numero);
+        }
+
+        return $numero;
     }
 
-    return $numero;
-}
-
-function formatDate($date) {
-    $dateTime = DateTime::createFromFormat('Y-m-d', $date);
-    return $dateTime->format('d/m/Y');
-}
+    function formatDate($date) {
+        $dateTime = DateTime::createFromFormat('Y-m-d', $date);
+        return $dateTime->format('d/m/Y');
+    }
 ?>
 
 <!DOCTYPE html>
@@ -91,7 +77,7 @@ function formatDate($date) {
                 <h2>Detalhes do Currículo</h2>
             </div>
             <div class="curriculum-actions">
-                <button onclick="window.location.href='curriculum-update.php?id=<?php echo $curriculum['id']; ?>'" class="btn btn-edit">Editar</button>
+                <button onclick="window.location.href='curriculum-update.php?id=<?php echo $curriculum->getId(); ?>'" class="btn btn-edit">Editar</button>
                 <form action="" method="post">
                     <input type="hidden" name="id" value="<?php echo $page; ?>">
                     <button type="submit" class="btn btn-delete">Deletar</button>
@@ -104,24 +90,24 @@ function formatDate($date) {
                 <ul>
                     <?php foreach ($academicBackground as $background): ?>
                         <li>
-                            <i><?php echo htmlspecialchars($background['scholarly']) . "</i><br>" . htmlspecialchars($background['course_name']) . "<br>" . htmlspecialchars($background['college']) . "<br><strong>" . htmlspecialchars($background['status']) . "</strong><br><br>"; ?>
+                            <i><?php echo htmlspecialchars($background->getScholarly()) . "</i><br>" . htmlspecialchars($background->getCourseName()) . "<br>" . htmlspecialchars($background->getCollege()) . "<br><strong>" . htmlspecialchars($background->getStatus()) . "</strong><br><br>"; ?>
                         </li>
                     <?php endforeach; ?>
                 </ul>
             </div>
             <div class="details">
                 <h3>Dados Pessoais</h3>
-                <p><?php echo htmlspecialchars($curriculum['name']); ?>, <?php echo htmlspecialchars($curriculum['age']); ?></p>
-                <p><?php echo htmlspecialchars(formatContact($curriculum['contact'])); ?></p>
-                <p><a href="<?php echo htmlspecialchars($curriculum['github']); ?>" target="_blank"><?php echo htmlspecialchars($curriculum['github']); ?></a></p>
-                <p><?php echo nl2br(htmlspecialchars($curriculum['qualifications'])); ?></p>
+                <p><?php echo htmlspecialchars($curriculum->getName()); ?>, <?php echo htmlspecialchars($curriculum->getAge()); ?></p>
+                <p><?php echo htmlspecialchars(formatContact($curriculum->getContact())); ?></p>
+                <p><a href="<?php echo htmlspecialchars($curriculum->getGithub()); ?>" target="_blank"><?php echo htmlspecialchars($curriculum->getGithub()); ?></a></p>
+                <p><?php echo htmlspecialchars($curriculum->getQualifications()); ?></p>
             </div>
             <div class="details">
             <h3>Experiência</h3>
                 <ul>
                     <?php foreach ($experience as $exp): ?>
                         <li>
-                            <strong><?php echo htmlspecialchars($exp['company_name']) . "</strong>" . " - " . htmlspecialchars($exp['position']) . "<br>" . nl2br(htmlspecialchars($exp['description'])) . "<br>" . htmlspecialchars(formatDate($exp['admission_date'])) . " a " . ($exp['dismissal_date'] ? htmlspecialchars(formatDate($exp['dismissal_date'])) : 'Atual') . "<br><br>" ; ?>
+                            <strong><?php echo htmlspecialchars($exp->getCompanyName()) . "</strong>" . " - " . htmlspecialchars($exp->getPosition()) . "<br>" . nl2br(htmlspecialchars($exp->getDescription())) . "<br>" . htmlspecialchars(formatDate($exp->getAdmissionDate())) . " a " . ($exp->getDismissalDate() ? htmlspecialchars(formatDate($exp->getDismissalDate())) : 'Atual') . "<br><br>" ; ?>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -133,7 +119,7 @@ function formatDate($date) {
             <h3>Conhecimentos</h3>
                 <ul>
                     <?php foreach ($knowledge as $know): ?>
-                        <li><?php echo htmlspecialchars($know['knowledge']); ?></li>
+                        <li><?php echo htmlspecialchars($know->getKnowledge()); ?></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
